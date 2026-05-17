@@ -1,0 +1,26 @@
+import * as THREE from 'three';
+import {totalLaps,startZ,outer,settings} from './constants.js';
+import {clamp,lerp,onTrack,nearestTrackPoint,progressParam} from './physics.js';
+import {buildTrack} from './track.js';
+import {makeCar} from './car.js';
+import {fmtTime} from './ui.js';
+import {loadBestLap,saveBestLap} from './storage.js';
+export function createGame(ui){
+ const renderer=new THREE.WebGLRenderer({canvas:ui.canvas,antialias:true,alpha:false}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight);
+ const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0b0f14); const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000); camera.position.set(0,18,28); const clock=new THREE.Clock();
+ const sun=new THREE.DirectionalLight(0xffffff,1.1); sun.position.set(40,80,20); scene.add(sun,new THREE.AmbientLight(0xffffff,.25)); buildTrack(scene);
+ const playerMesh=makeCar(0xff3b30), aiMesh=makeCar(0x4aa3ff); scene.add(playerMesh,aiMesh);
+ const player={x:-2,z:startZ+8,vx:0,vz:0,yaw:Math.PI}, ai={t:0,speed:22,x:2,z:startZ+3,yaw:Math.PI};
+ const input={steer:0,accel:0,brake:0,handbrake:0};
+ let started=false,paused=false,raceTime=0,lap=0,lapStart=0,bestLap=loadBestLap(),lastProg=progressParam(player.x,player.z),countdown=3,finished=false,camMode=0;
+ const setStatus=(s)=>ui.elStatus.textContent=s;
+ const resetCar=()=>{player.x=-2;player.z=startZ+8;player.vx=0;player.vz=0;player.yaw=Math.PI;setStatus('Reset!');setTimeout(()=>{if(!paused)setStatus('');},800)};
+ const togglePause=()=>{if(!started)return;paused=!paused;setStatus(paused?'Paused':'');}; const switchCam=()=>camMode=(camMode+1)%2;
+ ui.startBtn.addEventListener('click',()=>{ui.overlay.style.display='none';started=true;paused=false;finished=false;countdown=3;raceTime=0;lap=0;lapStart=0;lastProg=progressParam(player.x,player.z);setStatus('3…');});
+ const aiPosFromT=(t)=>{const laneW=47,laneH=29,per=2*(2*laneW+2*laneH),dist=t*per,seg1=2*laneW,seg2=seg1+2*laneH,seg3=seg2+2*laneW; let x,z,fx,fz; if(dist<seg1){x=-laneW+(dist/(2*laneW))*(2*laneW);z=-laneH;fx=1;fz=0;} else if(dist<seg2){x=laneW;z=-laneH+((dist-seg1)/(2*laneH))*(2*laneH);fx=0;fz=1;} else if(dist<seg3){x=laneW-((dist-seg2)/(2*laneW))*(2*laneW);z=laneH;fx=-1;fz=0;} else {x=-laneW;z=laneH-((dist-seg3)/(2*laneH))*(2*laneH);fx=0;fz=-1;} return {x,z,yaw:Math.atan2(fx,fz)};};
+ const step=(dt)=>{ if(!started||paused)return; if(countdown>0){countdown-=dt; if(countdown>0)setStatus(`${Math.ceil(countdown)}…`); else {setStatus('GO!');setTimeout(()=>{if(!paused)setStatus('')},900);} return;} if(!finished)raceTime+=dt; const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw); let a=(!finished?input.accel*settings.accel-input.brake*settings.brake:0),speed=Math.hypot(player.vx,player.vz); if(speed>settings.maxSpeed&&a>0)a=0; player.vx+=fx*a*dt; player.vz+=fz*a*dt; player.yaw+=input.steer*(settings.turnRate*(0.3+0.7*clamp(speed/settings.maxSpeed,0,1)))*dt; player.vx*=Math.exp(-settings.drag*dt); player.vz*=Math.exp(-settings.drag*dt); const rx=Math.sin(player.yaw+Math.PI/2),rz=Math.cos(player.yaw+Math.PI/2),vSide=player.vx*rx+player.vz*rz,grip=settings.grip*(input.handbrake?settings.hbGripScale:1); player.vx-=rx*vSide*(1-Math.exp(-grip*dt)); player.vz-=rz*vSide*(1-Math.exp(-grip*dt)); player.x+=player.vx*dt; player.z+=player.vz*dt; if(!onTrack(player.x,player.z)){const p=nearestTrackPoint(player.x,player.z); player.x=lerp(player.x,p.x,1-Math.exp(-5*dt));player.z=lerp(player.z,p.z,1-Math.exp(-5*dt)); player.vx*=Math.exp(-2.2*dt);player.vz*=Math.exp(-2.2*dt);} ai.t=(ai.t+(ai.speed*dt)/(2*(outer.w+outer.h)))%1; const ap=aiPosFromT(ai.t); ai.x=ap.x+2.2;ai.z=ap.z;ai.yaw=ap.yaw; const prog=progressParam(player.x,player.z); if(!finished&&lastProg>0.85&&prog<0.15&&speed>6){lap++; const lt=raceTime-lapStart; if(lt<bestLap){bestLap=lt;saveBestLap(bestLap);} setStatus(`Lap ${lap}: ${fmtTime(lt)}`); setTimeout(()=>{if(!paused)setStatus('');},1200); lapStart=raceTime; if(lap>=totalLaps){finished=true;setStatus('FINISH! 用 ↺ 可重置继续跑。');}} lastProg=prog; };
+ const render=(dt)=>{playerMesh.position.set(player.x,0,player.z);playerMesh.rotation.y=player.yaw; aiMesh.position.set(ai.x,0,ai.z);aiMesh.rotation.y=ai.yaw; const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw); if(camMode===0){const behind=new THREE.Vector3(player.x-fx*10,6.5,player.z-fz*10),look=new THREE.Vector3(player.x+fx*4,1.2,player.z+fz*4); camera.position.lerp(behind,1-Math.exp(-6*dt)); camera.lookAt(look);} else {const high=new THREE.Vector3(player.x,42,player.z+.1);camera.position.lerp(high,1-Math.exp(-2.5*dt));camera.lookAt(new THREE.Vector3(player.x,0,player.z));} renderer.render(scene,camera); };
+ const hud=()=>{const v=Math.hypot(player.vx,player.vz); ui.elSpeed.textContent=`Speed: ${Math.round(v*3.6)} km/h`; ui.elLap.textContent=`Lap: ${lap}/${totalLaps}`; ui.elTime.textContent=`Time: ${fmtTime(raceTime)}`; ui.elBest.textContent=`Best: ${bestLap<Infinity?fmtTime(bestLap):'--:--.---'}`;};
+ addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});
+ return {input,actions:{togglePause,resetCar,switchCam},tick:()=>{const dt=Math.min(clock.getDelta(),0.033);step(dt);render(dt);hud();}};
+}

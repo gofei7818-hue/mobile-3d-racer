@@ -1,31 +1,50 @@
 # mobile-3d-racer
 
-一个可直接部署到 **GitHub Pages / Netlify** 的手机优先 3D 赛车小游戏（Three.js + 原生 HTML/CSS/JS）。
+阶段一（架构重构 + PWA 基础）已完成：
+
+## 项目结构
+- `index.html`
+- `manifest.webmanifest`
+- `service-worker.js`
+- `styles/game.css`
+- `src/main.js`
+- `src/game.js`
+- `src/car.js`
+- `src/track.js`
+- `src/physics.js`
+- `src/controls.js`
+- `src/audio.js`（阶段一占位）
+- `src/ui.js`
+- `src/storage.js`
+- `src/constants.js`
 
 ## 本地运行
-直接双击 `index.html` 或使用任意静态服务器打开即可。
+可直接使用任意静态服务器，例如：
 
-## 手机访问建议
-- 推荐 iPhone Safari，横屏体验最佳。
-- 支持触控长按：左转、右转、加速、刹车/倒车。
-- 顶部按钮：暂停/继续、重新开始。
-- 撞障碍会游戏结束，点击 `↺` 可快速重开。
+```bash
+python3 -m http.server 8080
+```
 
-## 部署到 GitHub Pages
-1. 推送仓库到 GitHub。
-2. 进入 **Settings → Pages**。
-3. Source 选择 `Deploy from a branch`。
-4. 选择 `main`（或你的分支）和根目录 `/`。
-5. 保存后等待发布完成，使用生成的 Pages URL 访问。
+访问 `http://localhost:8080`。
 
-## 部署到 Netlify
-1. 登录 Netlify 并导入该仓库。
-2. 构建设置保持为空（无需 build command）。
-3. Publish directory 设置为仓库根目录（留空或 `.`）。
-4. 部署后使用分配的域名访问。
+## PWA / 离线说明
+1. 首次联网打开页面。
+2. 等待 service worker 安装完成（刷新一次）。
+3. 断网后再次打开，核心文件可离线加载。
 
-## 常见问题
-- **黑屏或加载失败**：检查网络是否能访问 `unpkg`（Three.js CDN）。
-- **iPhone 触控无响应**：确保未开启桌面模式，尝试刷新页面。
-- **卡顿**：代码已限制 DPR（像素比）以减轻 GPU 压力；低电量模式下可能仍降帧。
-- **底部按钮被遮挡**：已使用 `safe-area`，若仍遮挡可上滑隐藏 Safari 底栏。
+## iPhone Safari 添加到主屏幕
+1. 用 Safari 打开部署地址。
+2. 点击“分享”按钮。
+3. 选择“添加到主屏幕”。
+4. 从主屏幕启动将以独立应用样式打开。
+
+## 触控测试
+- 左侧转向区域：左右拖动。
+- 右侧按钮：长按加速/刹车/手刹。
+- 右上角：帮助、暂停、重置。
+
+## 声音测试（阶段一说明）
+- 当前 `src/audio.js` 为占位模块，第二阶段后续阶段会接入 Web Audio API。
+
+## 部署
+- 可直接部署至 **GitHub Pages** 或 **Netlify**（纯静态站点）。

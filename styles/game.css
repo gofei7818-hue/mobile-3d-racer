@@ -1,0 +1,26 @@
+html, body { margin:0; padding:0; height:100%; background:#0b0f14; overflow:hidden; touch-action:none; }
+#c { width:100vw; height:100vh; display:block; }
+#hud { position:fixed; left:0; top:0; right:0; pointer-events:none; padding:max(10px, env(safe-area-inset-top)) 12px 10px 12px; font:14px/1.25 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Noto Sans CJK SC","Helvetica Neue",Arial,sans-serif; color:#e7eef7; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+#hudRow { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.pill { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10); border-radius:999px; padding:6px 10px; }
+#status { margin-top:8px; opacity:.95; }
+#controls { position:fixed; left:0; right:0; bottom:0; padding:0 12px max(12px, env(safe-area-inset-bottom)) 12px; display:flex; justify-content:space-between; gap:12px; pointer-events:auto; }
+.panel { width:46vw; max-width:520px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:12px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.title { font-weight:600; opacity:.92; margin-bottom:10px; }
+.row { display:flex; gap:10px; align-items:center; }
+button { -webkit-tap-highlight-color:transparent; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); color:#e7eef7; padding:10px 12px; border-radius:12px; font-weight:600; flex:1; }
+button:active { transform:translateY(1px); background:rgba(255,255,255,.12); }
+.big { padding:14px 12px; font-size:16px; }
+#steerArea { height:92px; border-radius:12px; border:1px dashed rgba(255,255,255,.20); background:rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center; user-select:none; }
+#steerDot { width:16px; height:16px; border-radius:999px; background:rgba(255,255,255,.85); box-shadow:0 6px 18px rgba(0,0,0,.45); transform:translateX(0px); }
+#help { position:fixed; right:12px; top:max(64px, env(safe-area-inset-top) + 54px); width:min(460px, calc(100vw - 24px)); background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.14); border-radius:14px; padding:10px 12px; color:#e7eef7; display:none; pointer-events:auto; }
+#help h3 { margin:0 0 6px; font-size:14px; }
+#help p { margin:0; font-size:13px; opacity:.92; }
+#topBtns { position:fixed; right:12px; top:max(10px, env(safe-area-inset-top)); display:flex; gap:10px; }
+#topBtns button { flex:0; padding:8px 10px; border-radius:12px; font-weight:700; }
+#overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); color:#e7eef7; font:16px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Noto Sans CJK SC","Helvetica Neue",Arial,sans-serif; padding:24px; }
+#card { width:min(560px, 100%); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:18px; padding:18px; }
+#card h2 { margin:0 0 10px; font-size:18px; }
+#card ul { margin:8px 0 0 18px; padding:0; opacity:.92; }
+#card li { margin:6px 0; }
+#startBtn { width:100%; margin-top:14px; }
