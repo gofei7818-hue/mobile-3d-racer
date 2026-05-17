@@ -7,734 +7,134 @@
   <style>
     html, body { margin:0; padding:0; height:100%; background:#0b0f14; overflow:hidden; touch-action:none; }
     #c { width:100vw; height:100vh; display:block; }
-    #hud {
-      position:fixed; left:0; top:0; right:0; pointer-events:none;
-      padding: max(10px, env(safe-area-inset-top)) 12px 10px 12px;
-      font: 14px/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Noto Sans CJK SC", "Helvetica Neue", Arial, sans-serif;
-      color:#e7eef7; text-shadow:0 1px 2px rgba(0,0,0,.6);
-    }
-    #hudRow { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    #hud { position:fixed; left:0; top:0; right:0; pointer-events:none; padding:max(10px,env(safe-area-inset-top)) 12px 10px; color:#e7eef7; font:14px/1.25 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC",sans-serif; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+    #hudRow { display:flex; gap:10px; flex-wrap:wrap; }
     .pill { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10); border-radius:999px; padding:6px 10px; }
-    #status { margin-top:8px; opacity:.95; }
-    #controls {
-      position:fixed; left:0; right:0; bottom:0;
-      padding: 0 12px max(12px, env(safe-area-inset-bottom)) 12px;
-      display:flex; justify-content:space-between; gap:12px;
-      pointer-events:auto;
-    }
-    .panel {
-      width: 46vw; max-width: 520px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:12px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .title { font-weight:600; opacity:.92; margin-bottom:10px; }
-    .row { display:flex; gap:10px; align-items:center; }
-    button {
-      -webkit-tap-highlight-color: transparent;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.08);
-      color:#e7eef7;
-      padding:10px 12px;
-      border-radius:12px;
-      font-weight:600;
-      flex:1;
-    }
-    button:active { transform: translateY(1px); background:rgba(255,255,255,.12); }
-    .big { padding:14px 12px; font-size:16px; }
-    #steerArea {
-      height: 92px;
-      border-radius:12px;
-      border:1px dashed rgba(255,255,255,.20);
-      background:rgba(0,0,0,.15);
-      display:flex; align-items:center; justify-content:center;
-      user-select:none;
-    }
-    #steerDot {
-      width: 16px; height: 16px; border-radius:999px;
-      background:rgba(255,255,255,.85);
-      box-shadow:0 6px 18px rgba(0,0,0,.45);
-      transform: translateX(0px);
-    }
-    #help {
-      position:fixed; right:12px; top: max(64px, env(safe-area-inset-top) + 54px);
-      width:min(460px, calc(100vw - 24px));
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:14px;
-      padding:10px 12px;
-      color:#e7eef7;
-      display:none;
-      pointer-events:auto;
-    }
-    #help h3 { margin:0 0 6px 0; font-size:14px; }
-    #help p { margin:0; font-size:13px; opacity:.92; }
-    #topBtns { position:fixed; right:12px; top: max(10px, env(safe-area-inset-top)); display:flex; gap:10px; }
-    #topBtns button { flex:0; padding:8px 10px; border-radius:12px; font-weight:700; }
-    #overlay {
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.55);
-      color:#e7eef7;
-      font: 16px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Noto Sans CJK SC", "Helvetica Neue", Arial, sans-serif;
-      padding:24px;
-    }
-    #card {
-      width:min(560px, 100%);
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:18px;
-      padding:18px;
-    }
-    #card h2 { margin:0 0 10px 0; font-size:18px; }
-    #card ul { margin:8px 0 0 18px; padding:0; opacity:.92; }
-    #card li { margin:6px 0; }
-    #startBtn { width:100%; margin-top:14px; }
+    #controls { position:fixed; left:0; right:0; bottom:0; padding:0 12px max(12px,env(safe-area-inset-bottom)) 12px; display:flex; gap:10px; pointer-events:auto; }
+    .panel { flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px; }
+    .row { display:flex; gap:8px; }
+    button { border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.1); color:#e7eef7; border-radius:12px; padding:12px; font-size:15px; font-weight:700; min-height:48px; flex:1; touch-action:none; -webkit-tap-highlight-color:transparent; }
+    button:active { transform: translateY(1px); }
+    #topBtns { position:fixed; right:12px; top:max(10px,env(safe-area-inset-top)); display:flex; gap:8px; }
+    #overlay,#rotateTip { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.58); color:#e7eef7; z-index:10; }
+    #rotateTip { display:none; z-index:11; text-align:center; padding:20px; }
+    #card { width:min(560px,100%); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:16px; }
   </style>
-
-  <!-- Import Three.js from CDN (works on iPhone Safari). -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-      }
-    }
-  </script>
+  <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body>
   <canvas id="c"></canvas>
-
-  <div id="hud">
-    <div id="hudRow">
-      <div class="pill" id="speed">Speed: 0 km/h</div>
-      <div class="pill" id="lap">Lap: 0/3</div>
-      <div class="pill" id="time">Time: 00:00.000</div>
-      <div class="pill" id="best">Best: --:--.---</div>
-    </div>
-    <div id="status"></div>
-  </div>
-
-  <div id="topBtns">
-    <button id="btnHelp">?</button>
-    <button id="btnPause">⏸</button>
-    <button id="btnReset">↺</button>
-  </div>
-
-  <div id="help">
-    <h3>触控说明</h3>
-    <p>左侧：在“转向区”左右拖动（越远越急）</p>
-    <p>右侧：加速/刹车按钮；HB 手刹可漂移</p>
-    <p>目标：3 圈内跑出最佳圈速</p>
-  </div>
-
+  <div id="hud"><div id="hudRow"><div class="pill" id="speed">速度: 0 km/h</div><div class="pill" id="dist">距离: 0 m</div><div class="pill" id="score">得分: 0</div><div class="pill" id="time">时间: 00:00.000</div></div><div id="status"></div></div>
+  <div id="topBtns"><button id="btnPause">⏸</button><button id="btnReset">↺</button></div>
   <div id="controls">
-    <div class="panel" id="leftPanel">
-      <div class="title">转向</div>
-      <div id="steerArea">
-        <div id="steerDot"></div>
-      </div>
-    </div>
-
-    <div class="panel" id="rightPanel">
-      <div class="title">动力</div>
-      <div class="row">
-        <button id="btnAccel" class="big">加速</button>
-        <button id="btnBrake" class="big">刹车</button>
-      </div>
-      <div class="row" style="margin-top:10px;">
-        <button id="btnHB">HB 手刹</button>
-        <button id="btnCam">视角</button>
-      </div>
-    </div>
+    <div class="panel"><div class="row"><button id="btnLeft">← 左转</button><button id="btnRight">右转 →</button></div></div>
+    <div class="panel"><div class="row"><button id="btnAccel">加速</button><button id="btnBrake">刹车/倒车</button></div></div>
   </div>
-
-  <div id="overlay">
-    <div id="card">
-      <h2>3D Racer（手机网页版）</h2>
-      <div style="opacity:.92">
-        这是一个<strong>可直接在手机浏览器玩</strong>的 3D 赛车小游戏（WebGL）。<br/>
-        如果你看到黑屏：请用 Safari/Chrome 打开，且保持网络可访问 unpkg（Three.js CDN）。
-      </div>
-      <ul>
-        <li>AI 对手 + 计圈 + HUD</li>
-        <li>触控操控：转向/油门/刹车/手刹</li>
-        <li>支持“添加到主屏幕”当 App 用</li>
-      </ul>
-      <button id="startBtn" class="big">开始游戏</button>
-    </div>
-  </div>
-
+  <div id="overlay"><div id="card"><h2>3D Racer 手机版</h2><p>加载完成后点击开始。推荐横屏体验，支持 Safari/Chrome。</p><button id="startBtn">Start Game</button></div></div>
+  <div id="rotateTip"><div><h3>建议横屏游玩</h3><p>当前竖屏也可玩，但横屏视野更好。</p></div></div>
   <script type="module">
     import * as THREE from "three";
+    const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+    const lerp = (a,b,t)=>a+(b-a)*t;
+    const fmtTime = (t)=>{const ms=Math.round(t*1000),m=Math.floor(ms/60000),s=Math.floor(ms%60000/100),r=ms%1000;return `${String(m).padStart(2,"0")}:${String(Math.floor((ms%60000)/1000)).padStart(2,"0")}.${String(r).padStart(3,"0")}`};
 
-    // ---------- Utility ----------
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const lerp = (a, b, t) => a + (b - a) * t;
-    function fmtTime(t) {
-      const ms = Math.round(t * 1000);
-      const m = Math.floor(ms / 60000);
-      const s = Math.floor((ms - m * 60000) / 1000);
-      const r = ms - m * 60000 - s * 1000;
-      return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+"."+String(r).padStart(3,"0");
+    const $=(id)=>document.getElementById(id);
+    const elSpeed=$("speed"),elDist=$("dist"),elScore=$("score"),elTime=$("time"),elStatus=$("status");
+    const overlay=$("overlay"),rotateTip=$("rotateTip"),startBtn=$("startBtn"),btnPause=$("btnPause"),btnReset=$("btnReset");
+    const btnLeft=$("btnLeft"),btnRight=$("btnRight"),btnAccel=$("btnAccel"),btnBrake=$("btnBrake");
+
+    const canvas=$("c");
+    const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));
+    renderer.setSize(innerWidth,innerHeight);
+    const scene=new THREE.Scene(); scene.background=new THREE.Color(0x87bde7);
+    const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000);
+    const clock=new THREE.Clock();
+    scene.add(new THREE.HemisphereLight(0xffffff,0x2a3f2f,1.1));
+    const sun=new THREE.DirectionalLight(0xffffff,0.5); sun.position.set(50,80,20); scene.add(sun);
+
+    const outer={w:120,h:84},inner={w:66,h:34}; const hoW=outer.w/2,hoH=outer.h/2,hiW=inner.w/2,hiH=inner.h/2;
+    const startZ=-hiH;
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(420,420),new THREE.MeshLambertMaterial({color:0x2e6b33})); ground.rotation.x=-Math.PI/2; scene.add(ground);
+    const road=new THREE.Mesh(new THREE.PlaneGeometry(outer.w,outer.h),new THREE.MeshLambertMaterial({color:0x2e313a})); road.rotation.x=-Math.PI/2; road.position.y=.02; scene.add(road);
+    const mid=new THREE.Mesh(new THREE.PlaneGeometry(inner.w,inner.h),new THREE.MeshLambertMaterial({color:0x3b8a3d})); mid.rotation.x=-Math.PI/2; mid.position.y=.03; scene.add(mid);
+
+    function mkCar(c){const g=new THREE.Group(); const body=new THREE.Mesh(new THREE.BoxGeometry(2,0.9,4),new THREE.MeshLambertMaterial({color:c})); body.position.y=.55; g.add(body); return g;}
+    const car=mkCar(0xff3b30); const ai=mkCar(0x4aa3ff); scene.add(car,ai);
+
+    const coneGeo=new THREE.ConeGeometry(.7,1.4,8),coneMat=new THREE.MeshLambertMaterial({color:0xffa43a});
+    const obstacles=[];
+    for(let i=0;i<16;i++){const m=new THREE.Mesh(coneGeo,coneMat); m.position.set((i%2?1:-1)*(hiW+4.2),0.7,lerp(-hiH+4,hiH-4,i/15)); scene.add(m); obstacles.push(m);}
+
+    const player={x:-2,z:startZ+8,vx:0,vz:0,yaw:Math.PI,speed:0,alive:true,offTrackTime:0};
+    const settings={accel:24,brake:30,max:34,turnRate:2.4,drag:1.45,grip:8.2};
+    const input={steerTarget:0,steer:0,accel:0,brake:0};
+    let started=false,paused=false,gameOver=false,time=0,distance=0,score=0;
+
+    function onTrack(x,z){const inOuter=Math.abs(x)<=hoW&&Math.abs(z)<=hoH,inInner=Math.abs(x)<=hiW&&Math.abs(z)<=hiH; return inOuter&&!inInner;}
+    function setStatus(t){elStatus.textContent=t;}
+
+    function hold(btn,down,up){
+      btn.addEventListener("pointerdown",e=>{e.preventDefault(); btn.setPointerCapture?.(e.pointerId); down();});
+      ["pointerup","pointercancel","pointerleave"].forEach(ev=>btn.addEventListener(ev,e=>{e.preventDefault(); up();}));
+      btn.addEventListener("contextmenu",e=>e.preventDefault());
     }
+    hold(btnLeft,()=>input.steerTarget=-1,()=>{if(input.steerTarget<0) input.steerTarget=0;});
+    hold(btnRight,()=>input.steerTarget=1,()=>{if(input.steerTarget>0) input.steerTarget=0;});
+    hold(btnAccel,()=>input.accel=1,()=>input.accel=0);
+    hold(btnBrake,()=>input.brake=1,()=>input.brake=0);
 
-    // ---------- DOM ----------
-    const canvas = document.getElementById("c");
-    const elSpeed = document.getElementById("speed");
-    const elLap = document.getElementById("lap");
-    const elTime = document.getElementById("time");
-    const elBest = document.getElementById("best");
-    const elStatus = document.getElementById("status");
-    const overlay = document.getElementById("overlay");
-    const startBtn = document.getElementById("startBtn");
-    const btnPause = document.getElementById("btnPause");
-    const btnReset = document.getElementById("btnReset");
-    const btnHelp = document.getElementById("btnHelp");
-    const help = document.getElementById("help");
-    const btnAccel = document.getElementById("btnAccel");
-    const btnBrake = document.getElementById("btnBrake");
-    const btnHB = document.getElementById("btnHB");
-    const btnCam = document.getElementById("btnCam");
-    const steerArea = document.getElementById("steerArea");
-    const steerDot = document.getElementById("steerDot");
+    addEventListener("keydown",e=>{if(e.code==="ArrowLeft"||e.code==="KeyA")input.steerTarget=-1; if(e.code==="ArrowRight"||e.code==="KeyD")input.steerTarget=1; if(e.code==="ArrowUp"||e.code==="KeyW")input.accel=1; if(e.code==="ArrowDown"||e.code==="KeyS")input.brake=1;});
+    addEventListener("keyup",e=>{if(["ArrowLeft","KeyA"].includes(e.code)&&input.steerTarget<0)input.steerTarget=0; if(["ArrowRight","KeyD"].includes(e.code)&&input.steerTarget>0)input.steerTarget=0; if(["ArrowUp","KeyW"].includes(e.code))input.accel=0; if(["ArrowDown","KeyS"].includes(e.code))input.brake=0;});
 
-    // ---------- Game parameters ----------
-    const totalLaps = 3;
+    btnPause.onclick=()=>{if(!started||gameOver)return; paused=!paused; btnPause.textContent=paused?"▶":"⏸"; setStatus(paused?"已暂停":"继续比赛");};
+    btnReset.onclick=()=>resetGame();
+    startBtn.onclick=()=>{overlay.style.display="none"; resetGame(); started=true;};
 
-    // Track: "donut rectangle" in XZ plane
-    const outer = { w: 120, h: 80 };
-    const inner = { w: 68, h: 36 };
-    const halfOuterW = outer.w / 2, halfOuterH = outer.h / 2;
-    const halfInnerW = inner.w / 2, halfInnerH = inner.h / 2;
+    function resetGame(){player.x=-2;player.z=startZ+8;player.vx=0;player.vz=0;player.yaw=Math.PI;player.alive=true;player.offTrackTime=0;time=0;distance=0;score=0;gameOver=false;paused=false;btnPause.textContent="⏸";setStatus("开始！");}
 
-    // Start/finish line at z = -halfInnerH, across x in [-halfInnerW, halfInnerW]
-    const startZ = -halfInnerH;
-
-    // ---------- Three.js setup ----------
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(innerWidth, innerHeight);
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0f14);
-
-    const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 1000);
-    camera.position.set(0, 18, 28);
-
-    const clock = new THREE.Clock();
-
-    // Lights
-    const sun = new THREE.DirectionalLight(0xffffff, 1.1);
-    sun.position.set(40, 80, 20);
-    scene.add(sun);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.25));
-
-    // Ground
-    const groundGeo = new THREE.PlaneGeometry(400, 400);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x103018, roughness: 1.0, metalness: 0.0 });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = 0;
-    scene.add(ground);
-
-    // Track mesh (visual): outer plane minus inner (we fake with 2 planes + green inside)
-    const trackMat = new THREE.MeshStandardMaterial({ color: 0x2a2f3a, roughness: 0.95, metalness: 0.0 });
-    const trackOuter = new THREE.Mesh(new THREE.PlaneGeometry(outer.w, outer.h), trackMat);
-    trackOuter.rotation.x = -Math.PI/2;
-    trackOuter.position.y = 0.02;
-    scene.add(trackOuter);
-
-    const grassInner = new THREE.Mesh(new THREE.PlaneGeometry(inner.w, inner.h),
-      new THREE.MeshStandardMaterial({ color: 0x164c24, roughness: 1.0, metalness: 0.0 })
-    );
-    grassInner.rotation.x = -Math.PI/2;
-    grassInner.position.y = 0.03;
-    scene.add(grassInner);
-
-    // Curbs: simple border lines
-    function addRectLine(w, h, y, color) {
-      const pts = [
-        new THREE.Vector3(-w/2, y, -h/2),
-        new THREE.Vector3( w/2, y, -h/2),
-        new THREE.Vector3( w/2, y,  h/2),
-        new THREE.Vector3(-w/2, y,  h/2),
-        new THREE.Vector3(-w/2, y, -h/2),
-      ];
-      const geo = new THREE.BufferGeometry().setFromPoints(pts);
-      const mat = new THREE.LineBasicMaterial({ color });
-      const line = new THREE.Line(geo, mat);
-      scene.add(line);
-    }
-    addRectLine(outer.w, outer.h, 0.06, 0x556077);
-    addRectLine(inner.w, inner.h, 0.06, 0x2a8f44);
-
-    // Start line
-    const startLine = new THREE.Mesh(new THREE.PlaneGeometry(inner.w, 1.2),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1.0 })
-    );
-    startLine.rotation.x = -Math.PI/2;
-    startLine.position.set(0, 0.07, startZ);
-    scene.add(startLine);
-
-    // Simple cones
-    function addCone(x, z) {
-      const geo = new THREE.ConeGeometry(0.7, 1.4, 10);
-      const mat = new THREE.MeshStandardMaterial({ color: 0xffa43a, roughness: 0.9 });
-      const m = new THREE.Mesh(geo, mat);
-      m.position.set(x, 0.7, z);
-      scene.add(m);
-      return m;
-    }
-    const cones = [];
-    for (let i=0;i<18;i++){
-      const side = i%2===0 ? 1 : -1;
-      const x = (halfInnerW + 2.6) * side;
-      const z = lerp(-halfInnerH+6, halfInnerH-6, i/17);
-      cones.push(addCone(x, z));
-    }
-
-    // ---------- Car model ----------
-    function makeCar(color) {
-      const group = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 4.0),
-        new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.0 })
-      );
-      body.position.y = 0.55;
-      group.add(body);
-
-      const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.7, 1.8),
-        new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.3, metalness: 0.0 })
-      );
-      cabin.position.set(0, 0.95, -0.4);
-      group.add(cabin);
-
-      const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.35, 14);
-      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0b0f14, roughness: 1.0, metalness: 0.0 });
-      const wheelPos = [
-        [-1.1, 0.35, -1.3],
-        [ 1.1, 0.35, -1.3],
-        [-1.1, 0.35,  1.3],
-        [ 1.1, 0.35,  1.3],
-      ];
-      wheelPos.forEach(([x,y,z])=>{
-        const w = new THREE.Mesh(wheelGeo, wheelMat);
-        w.rotation.z = Math.PI/2;
-        w.position.set(x,y,z);
-        group.add(w);
-      });
-      return group;
-    }
-
-    const playerMesh = makeCar(0xff3b30);
-    scene.add(playerMesh);
-
-    const aiMesh = makeCar(0x4aa3ff);
-    scene.add(aiMesh);
-
-    // ---------- Simple physics (arcade) ----------
-    const player = {
-      x: -2, z: startZ + 8, y: 0,
-      vx: 0, vz: 0,
-      yaw: Math.PI, // facing +z
-      speed: 0
-    };
-    const ai = {
-      t: 0, // progress 0..1
-      speed: 22, // m/s
-      x: 2, z: startZ + 3, yaw: Math.PI
-    };
-
-    const settings = {
-      accel: 26.0,        // m/s^2
-      brake: 34.0,
-      maxSpeed: 38.0,     // m/s ~ 136 km/h
-      turnRate: 2.35,     // rad/s at speed 1
-      grip: 8.5,          // lateral damping
-      drag: 1.35,         // forward damping
-      hbGripScale: 0.35   // less grip when handbrake
-    };
-
-    // Determine if point is on track (between outer and inner rect)
-    function onTrack(x, z) {
-      const inOuter = (Math.abs(x) <= halfOuterW && Math.abs(z) <= halfOuterH);
-      const inInner = (Math.abs(x) <= halfInnerW && Math.abs(z) <= halfInnerH);
-      return inOuter && !inInner;
-    }
-
-    function nearestTrackPoint(x, z) {
-      // Clamp to outer, then push out of inner if inside inner.
-      let nx = clamp(x, -halfOuterW, halfOuterW);
-      let nz = clamp(z, -halfOuterH, halfOuterH);
-      // if inside inner, push to nearest inner border
-      if (Math.abs(nx) < halfInnerW && Math.abs(nz) < halfInnerH) {
-        const dx = halfInnerW - Math.abs(nx);
-        const dz = halfInnerH - Math.abs(nz);
-        if (dx < dz) nx = Math.sign(nx || 1) * halfInnerW;
-        else nz = Math.sign(nz || 1) * halfInnerH;
-      }
-      return { x: nx, z: nz };
-    }
-
-    // Track progress for lap counting: map position to parameter along "inner rectangle perimeter"
-    function progressParam(x, z) {
-      // Follow around inner rectangle offset outward to lane center.
-      // We'll approximate lane center rectangle at mid size:
-      const laneW = (halfInnerW + halfOuterW)/2;
-      const laneH = (halfInnerH + halfOuterH)/2;
-      const ax = clamp(x, -laneW, laneW);
-      const az = clamp(z, -laneH, laneH);
-
-      // Determine which edge we're closest to for paramization (clockwise)
-      const dx = Math.abs(Math.abs(ax) - laneW);
-      const dz = Math.abs(Math.abs(az) - laneH);
-      let t = 0;
-      const per = 2*(2*laneW + 2*laneH);
-
-      // Start/finish at (0, -laneH) moving +x
-      // Edge 1: bottom (-laneH), x from -laneW..+laneW
-      // Edge 2: right (+laneW), z from -laneH..+laneH
-      // Edge 3: top (+laneH), x from +laneW..-laneW
-      // Edge 4: left (-laneW), z from +laneH..-laneH
-      const eps = 1e-6;
-      if (dz < dx) {
-        // near top/bottom
-        if (az < 0) {
-          // bottom
-          const xNorm = (ax + laneW) / (2*laneW);
-          t = xNorm * (2*laneW);
-        } else {
-          // top
-          const xNorm = (laneW - ax) / (2*laneW);
-          t = (2*laneW + 2*laneH) + xNorm * (2*laneW);
-        }
+    function update(dt){if(!started||paused||gameOver)return;
+      time+=dt;
+      // 中文注释：方向盘回正 + 惯性平滑，避免瞬间打满
+      input.steer=lerp(input.steer,input.steerTarget,1-Math.exp(-8*dt));
+      const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw);
+      let acc=input.accel*settings.accel-input.brake*settings.brake;
+      const sp=Math.hypot(player.vx,player.vz); if(sp>settings.max&&acc>0) acc=0;
+      player.vx+=fx*acc*dt; player.vz+=fz*acc*dt;
+      const turn=settings.turnRate*(0.35+0.65*clamp(sp/settings.max,0,1)); player.yaw+=input.steer*turn*dt;
+      player.vx*=Math.exp(-settings.drag*dt); player.vz*=Math.exp(-settings.drag*dt);
+      const rx=Math.sin(player.yaw+Math.PI/2),rz=Math.cos(player.yaw+Math.PI/2),side=player.vx*rx+player.vz*rz;
+      player.vx-=rx*side*(1-Math.exp(-settings.grip*dt)); player.vz-=rz*side*(1-Math.exp(-settings.grip*dt));
+      player.x+=player.vx*dt; player.z+=player.vz*dt;
+      if(!onTrack(player.x,player.z)){
+        player.offTrackTime += dt;
+        player.vx*=Math.exp(-2.2*dt); player.vz*=Math.exp(-2.2*dt); score=Math.max(0,score-2); setStatus("冲出赛道，速度受损");
+        if (player.offTrackTime > 2.8) { gameOver = true; setStatus("长时间出界，游戏结束"); }
       } else {
-        // near sides
-        if (ax > 0) {
-          // right side
-          const zNorm = (az + laneH) / (2*laneH);
-          t = (2*laneW) + zNorm * (2*laneH);
-        } else {
-          // left side
-          const zNorm = (laneH - az) / (2*laneH);
-          t = (2*laneW + 2*laneH + 2*laneW) + zNorm * (2*laneH);
-        }
-      }
-      return clamp(t / per, 0, 1);
-    }
-
-    // ---------- Race state ----------
-    let started = false;
-    let paused = false;
-    let raceTime = 0;
-    let lap = 0;
-    let lapStart = 0;
-    let bestLap = Infinity;
-    let lastProg = progressParam(player.x, player.z);
-    let countdown = 3.0;
-    let finished = false;
-
-    function setStatus(s) { elStatus.textContent = s; }
-
-    // ---------- Controls ----------
-    const input = {
-      steer: 0,
-      accel: 0,
-      brake: 0,
-      handbrake: 0
-    };
-
-    // Steering pad
-    let steerPointer = null;
-    let steerStartX = 0;
-    let steerRect = null;
-
-    function updateSteerDot() {
-      const maxPx = 36;
-      steerDot.style.transform = `translateX(${input.steer * maxPx}px)`;
-    }
-
-    steerArea.addEventListener("pointerdown", (e) => {
-      steerArea.setPointerCapture(e.pointerId);
-      steerPointer = e.pointerId;
-      steerRect = steerArea.getBoundingClientRect();
-      steerStartX = e.clientX;
-    });
-    steerArea.addEventListener("pointermove", (e) => {
-      if (steerPointer !== e.pointerId) return;
-      const dx = e.clientX - steerStartX;
-      const maxDx = (steerRect?.width || 200) * 0.35;
-      input.steer = clamp(dx / maxDx, -1, 1);
-      updateSteerDot();
-    });
-    steerArea.addEventListener("pointerup", (e) => {
-      if (steerPointer !== e.pointerId) return;
-      steerPointer = null;
-      input.steer = 0;
-      updateSteerDot();
-    });
-    steerArea.addEventListener("pointercancel", () => {
-      steerPointer = null; input.steer = 0; updateSteerDot();
-    });
-
-    // Buttons (hold)
-    function holdButton(btn, key) {
-      let down = false;
-      const set = (v) => { input[key] = v; };
-      const onDown = (e) => { e.preventDefault(); down = true; set(1); };
-      const onUp = (e) => { e.preventDefault(); down = false; set(0); };
-      btn.addEventListener("pointerdown", onDown);
-      btn.addEventListener("pointerup", onUp);
-      btn.addEventListener("pointercancel", onUp);
-      btn.addEventListener("pointerleave", (e)=>{ if(down) onUp(e); });
-      btn.addEventListener("contextmenu", e=>e.preventDefault());
-    }
-    holdButton(btnAccel, "accel");
-    holdButton(btnBrake, "brake");
-    holdButton(btnHB, "handbrake");
-
-    btnPause.addEventListener("click", () => togglePause());
-    btnReset.addEventListener("click", () => resetCar());
-    btnHelp.addEventListener("click", () => { help.style.display = help.style.display==="none"||!help.style.display ? "block" : "none"; });
-    btnCam.addEventListener("click", () => switchCam());
-
-    function togglePause() {
-      if (!started) return;
-      paused = !paused;
-      setStatus(paused ? "Paused" : "");
-    }
-
-    function resetCar() {
-      // Reset player near start, preserve best lap
-      player.x = -2; player.z = startZ + 8;
-      player.vx = 0; player.vz = 0;
-      player.yaw = Math.PI;
-      setStatus("Reset!");
-      setTimeout(()=>{ if(!paused) setStatus(""); }, 800);
-    }
-
-    // Camera modes
-    let camMode = 0; // 0 chase, 1 high
-    function switchCam(){
-      camMode = (camMode + 1) % 2;
-    }
-
-    // Start button
-    startBtn.addEventListener("click", () => {
-      overlay.style.display = "none";
-      started = true;
-      paused = false;
-      finished = false;
-      countdown = 3.0;
-      raceTime = 0;
-      lap = 0;
-      lapStart = 0;
-      bestLap = Infinity;
-      lastProg = progressParam(player.x, player.z);
-      setStatus("3…");
-    });
-
-    // ---------- AI movement on track perimeter ----------
-    function aiPosFromT(t) {
-      // Follow lane center rectangle
-      const laneW = (halfInnerW + halfOuterW)/2;
-      const laneH = (halfInnerH + halfOuterH)/2;
-      const per = 2*(2*laneW + 2*laneH);
-      const dist = t * per;
-
-      const seg1 = 2*laneW;
-      const seg2 = seg1 + 2*laneH;
-      const seg3 = seg2 + 2*laneW;
-      // seg4 = per
-
-      let x=0,z=0,yaw=0;
-      if (dist < seg1) {
-        const u = dist / (2*laneW);
-        x = -laneW + u * (2*laneW);
-        z = -laneH;
-        yaw = Math.PI/2 * 0 + Math.PI; // facing +z? We'll compute from direction instead
-        // direction +x
-        yaw = Math.PI/2 * 0; // facing +x in XZ plane: yaw = 0 means facing -z in our usage, so we'll handle below.
-      } else if (dist < seg2) {
-        const u = (dist - seg1) / (2*laneH);
-        x = laneW;
-        z = -laneH + u * (2*laneH);
-      } else if (dist < seg3) {
-        const u = (dist - seg2) / (2*laneW);
-        x = laneW - u * (2*laneW);
-        z = laneH;
-      } else {
-        const u = (dist - seg3) / (2*laneH);
-        x = -laneW;
-        z = laneH - u * (2*laneH);
+        player.offTrackTime = 0;
       }
 
-      // compute yaw from forward vector along path
-      let fx=0,fz=0;
-      if (dist < seg1) { fx = 1; fz = 0; }
-      else if (dist < seg2) { fx = 0; fz = 1; }
-      else if (dist < seg3) { fx = -1; fz = 0; }
-      else { fx = 0; fz = -1; }
-
-      // Our car forward is -Z axis in mesh; we store yaw such that forward = (sin(yaw), cos(yaw))? Let's define:
-      // forward vector in world XZ = (Math.sin(yaw), Math.cos(yaw)) with yaw=0 => +Z
-      // We'll use that for physics too.
-      yaw = Math.atan2(fx, fz);
-      return {x,z,yaw};
+      for(const o of obstacles){if(Math.hypot(player.x-o.position.x,player.z-o.position.z)<1.6){gameOver=true; setStatus("撞到障碍物，游戏结束");}}
+      distance += Math.hypot(player.vx,player.vz)*dt; score=Math.max(0,Math.floor(distance*0.7-time*0.5));
+      const t=(time*0.07)%1, laneW=(hiW+hoW)/2,laneH=(hiH+hoH)/2,per=2*(2*laneW+2*laneH),d=t*per;
+      if(d<2*laneW){ai.position.set(-laneW+d,0,-laneH);} else if(d<2*laneW+2*laneH){ai.position.set(laneW,0,-laneH+(d-2*laneW));} else if(d<4*laneW+2*laneH){ai.position.set(laneW-(d-2*laneW-2*laneH),0,laneH);} else {ai.position.set(-laneW,0,laneH-(d-4*laneW-2*laneH));}
     }
 
-    // ---------- Main loop ----------
-    function step(dt) {
-      if (!started || paused) return;
-
-      // Countdown
-      if (countdown > 0) {
-        countdown -= dt;
-        const c = Math.ceil(countdown);
-        if (countdown > 0) setStatus(String(c) + "…");
-        else { setStatus("GO!"); setTimeout(()=>{ if(!paused) setStatus(""); }, 900); }
-        return;
-      }
-
-      if (!finished) raceTime += dt;
-
-      // Player movement (arcade)
-      const forwardX = Math.sin(player.yaw);
-      const forwardZ = Math.cos(player.yaw);
-
-      const vForward = player.vx * forwardX + player.vz * forwardZ;
-
-      // Accel/brake forces along forward
-      let a = 0;
-      if (!finished) {
-        a += input.accel * settings.accel;
-        a -= input.brake * settings.brake;
-      }
-      // Limit max speed
-      const speed = Math.sqrt(player.vx*player.vx + player.vz*player.vz);
-      const maxSpeed = settings.maxSpeed;
-      if (speed > maxSpeed && a > 0) a = 0;
-
-      // Apply longitudinal accel
-      player.vx += forwardX * a * dt;
-      player.vz += forwardZ * a * dt;
-
-      // Steering scales with speed (more stable when slow)
-      const speedN = clamp(speed / maxSpeed, 0, 1);
-      const steerPower = settings.turnRate * (0.3 + 0.7 * speedN);
-      player.yaw += input.steer * steerPower * dt;
-
-      // Drag (forward + general)
-      const drag = settings.drag;
-      player.vx *= Math.exp(-drag * dt);
-      player.vz *= Math.exp(-drag * dt);
-
-      // Lateral grip: damp sideways velocity
-      const rightX = Math.sin(player.yaw + Math.PI/2);
-      const rightZ = Math.cos(player.yaw + Math.PI/2);
-      const vSide = player.vx * rightX + player.vz * rightZ;
-      const hb = input.handbrake > 0 ? 1 : 0;
-      const grip = settings.grip * (hb ? settings.hbGripScale : 1.0);
-      player.vx -= rightX * vSide * (1 - Math.exp(-grip * dt));
-      player.vz -= rightZ * vSide * (1 - Math.exp(-grip * dt));
-
-      // Integrate position
-      player.x += player.vx * dt;
-      player.z += player.vz * dt;
-
-      // Off-track handling: friction + soft clamp back
-      if (!onTrack(player.x, player.z)) {
-        const p = nearestTrackPoint(player.x, player.z);
-        // Pull back gently
-        player.x = lerp(player.x, p.x, 1 - Math.exp(-5.0 * dt));
-        player.z = lerp(player.z, p.z, 1 - Math.exp(-5.0 * dt));
-        // Heavy slowdown
-        player.vx *= Math.exp(-2.2 * dt);
-        player.vz *= Math.exp(-2.2 * dt);
-      }
-
-      // AI progress
-      ai.t = (ai.t + (ai.speed * dt) / (2*(outer.w+outer.h))) % 1.0;
-      const ap = aiPosFromT(ai.t);
-      ai.x = ap.x + 2.2; // keep a bit offset
-      ai.z = ap.z;
-      ai.yaw = ap.yaw;
-
-      // Lap counting based on progress wrap
-      const prog = progressParam(player.x, player.z);
-      // Detect crossing near start: wrap from >0.85 to <0.15 (clockwise)
-      if (!finished && lastProg > 0.85 && prog < 0.15 && speed > 6.0) {
-        lap += 1;
-        const lapTime = raceTime - lapStart;
-        if (lap > 0) {
-          if (lapTime < bestLap) bestLap = lapTime;
-          setStatus("Lap " + lap + ": " + fmtTime(lapTime));
-          setTimeout(()=>{ if(!paused) setStatus(""); }, 1200);
-        }
-        lapStart = raceTime;
-        if (lap >= totalLaps) {
-          finished = true;
-          setStatus("FINISH! 用 ↺ 可重置继续跑。");
-        }
-      }
-      lastProg = prog;
+    const camPos = new THREE.Vector3();
+    const camLook = new THREE.Vector3();
+    function render(dt){car.position.set(player.x,0,player.z); car.rotation.y=player.yaw;
+      const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw);
+      camPos.set(player.x-fx*9,6.6,player.z-fz*9);
+      camLook.set(player.x+fx*5,1.2,player.z+fz*5);
+      camera.position.lerp(camPos,1-Math.exp(-7*dt));
+      camera.lookAt(camLook); renderer.render(scene,camera);
     }
+    function hud(){const v=Math.hypot(player.vx,player.vz); elSpeed.textContent=`速度: ${Math.round(v*3.6)} km/h`; elDist.textContent=`距离: ${Math.round(distance)} m`; elScore.textContent=`得分: ${score}`; elTime.textContent=`时间: ${fmtTime(time)}`;}
+    function resize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6)); renderer.setSize(innerWidth,innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); rotateTip.style.display=(innerHeight>innerWidth)?"flex":"none";}
+    addEventListener("resize",resize); resize();
+    document.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
 
-    function render(dt) {
-      // Update meshes
-      playerMesh.position.set(player.x, 0, player.z);
-      playerMesh.rotation.y = player.yaw;
-
-      aiMesh.position.set(ai.x, 0, ai.z);
-      aiMesh.rotation.y = ai.yaw;
-
-      // Camera follow
-      if (camMode === 0) {
-        const fx = Math.sin(player.yaw), fz = Math.cos(player.yaw);
-        const behind = new THREE.Vector3(player.x - fx * 10, 6.5, player.z - fz * 10);
-        const look = new THREE.Vector3(player.x + fx * 4, 1.2, player.z + fz * 4);
-        camera.position.lerp(behind, 1 - Math.exp(-6.0 * dt));
-        camera.lookAt(look);
-      } else {
-        const high = new THREE.Vector3(player.x, 42, player.z + 0.1);
-        camera.position.lerp(high, 1 - Math.exp(-2.5 * dt));
-        camera.lookAt(new THREE.Vector3(player.x, 0, player.z));
-      }
-
-      renderer.render(scene, camera);
-    }
-
-    function updateHUD() {
-      const v = Math.sqrt(player.vx*player.vx + player.vz*player.vz);
-      elSpeed.textContent = "Speed: " + Math.round(v * 3.6) + " km/h";
-      elLap.textContent = "Lap: " + lap + "/" + totalLaps;
-      elTime.textContent = "Time: " + fmtTime(raceTime);
-      elBest.textContent = "Best: " + (bestLap < Infinity ? fmtTime(bestLap) : "--:--.---");
-    }
-
-    function onResize() {
-      renderer.setSize(innerWidth, innerHeight);
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
-    }
-    addEventListener("resize", onResize);
-
-    // Prevent page scroll / pinch weirdness
-    document.addEventListener("gesturestart", e=>e.preventDefault());
-    document.addEventListener("touchmove", e=>e.preventDefault(), { passive:false });
-
-    updateSteerDot();
-
-    // Animation loop
-    function loop() {
-      const dt = Math.min(clock.getDelta(), 0.033);
-      step(dt);
-      render(dt);
-      updateHUD();
-      requestAnimationFrame(loop);
-    }
-    loop();
+    (function loop(){const dt=Math.min(clock.getDelta(),0.033); update(dt); render(dt); hud(); requestAnimationFrame(loop);})();
   </script>
 </body>
 </html>
